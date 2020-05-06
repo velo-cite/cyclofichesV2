@@ -28,17 +28,22 @@ class Issue
     /**
      * @ORM\Column(type="datetime", nullable=true)
      */
-    private $creation_date;
+    private $creationDate;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
-    private $adress;
+    private $address;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $gpsCoordinates;
 
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\ModeratorIssue", mappedBy="issue")
      */
-    private $moderatorIssues;
+    private $moderators;
 
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\Message", mappedBy="issue")
@@ -46,26 +51,41 @@ class Issue
     private $messages;
 
     /**
-     * @ORM\ManyToMany(targetEntity="App\Entity\Area", inversedBy="issues")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Area", inversedBy="issues")
      */
     private $area;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Picture", inversedBy="issues")
+     * @ORM\ManyToMany(targetEntity="App\Entity\Picture", inversedBy="issues")
      */
-    private $picture;
+    private $pictures;
 
     /**
-     * @ORM\ManyToMany(targetEntity="App\Entity\User", inversedBy="issues")
+     * @ORM\ManyToMany(targetEntity="App\Entity\User", inversedBy="issuesLiked")
      */
     private $liker;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\Status", inversedBy="issues")
+     */
+    private $status;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="issuesCreated")
+     */
+    private $creator;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\IssueCategory", inversedBy="issues")
+     */
+    private $category;
+
     public function __construct()
     {
-        $this->moderatorIssues = new ArrayCollection();
+        $this->moderators = new ArrayCollection();
         $this->messages = new ArrayCollection();
-        $this->area = new ArrayCollection();
         $this->liker = new ArrayCollection();
+        $this->pictures = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -87,24 +107,24 @@ class Issue
 
     public function getCreationDate(): ?\DateTimeInterface
     {
-        return $this->creation_date;
+        return $this->creationDate;
     }
 
-    public function setCreationDate(?\DateTimeInterface $creation_date): self
+    public function setCreationDate(?\DateTimeInterface $creationDate): self
     {
-        $this->creation_date = $creation_date;
+        $this->creationDate = $creationDate;
 
         return $this;
     }
 
-    public function getAdress(): ?string
+    public function getAddress(): ?string
     {
-        return $this->adress;
+        return $this->address;
     }
 
-    public function setAdress(?string $adress): self
+    public function setAddress(?string $address): self
     {
-        $this->adress = $adress;
+        $this->address = $address;
 
         return $this;
     }
@@ -112,15 +132,15 @@ class Issue
     /**
      * @return Collection|ModeratorIssue[]
      */
-    public function getModeratorIssues(): Collection
+    public function getModerators(): Collection
     {
-        return $this->moderatorIssues;
+        return $this->moderators;
     }
 
     public function addModeratorIssue(ModeratorIssue $moderatorIssue): self
     {
-        if (!$this->moderatorIssues->contains($moderatorIssue)) {
-            $this->moderatorIssues[] = $moderatorIssue;
+        if (!$this->moderators->contains($moderatorIssue)) {
+            $this->moderators[] = $moderatorIssue;
             $moderatorIssue->setIssue($this);
         }
 
@@ -129,8 +149,8 @@ class Issue
 
     public function removeModeratorIssue(ModeratorIssue $moderatorIssue): self
     {
-        if ($this->moderatorIssues->contains($moderatorIssue)) {
-            $this->moderatorIssues->removeElement($moderatorIssue);
+        if ($this->moderators->contains($moderatorIssue)) {
+            $this->moderators->removeElement($moderatorIssue);
             // set the owning side to null (unless already changed)
             if ($moderatorIssue->getIssue() === $this) {
                 $moderatorIssue->setIssue(null);
@@ -171,40 +191,14 @@ class Issue
         return $this;
     }
 
-    /**
-     * @return Collection|Area[]
-     */
-    public function getArea(): Collection
+    public function getPictures(): ?Picture
     {
-        return $this->area;
+        return $this->pictures;
     }
 
-    public function addArea(Area $area): self
+    public function setPictures(?Picture $pictures): self
     {
-        if (!$this->area->contains($area)) {
-            $this->area[] = $area;
-        }
-
-        return $this;
-    }
-
-    public function removeArea(Area $area): self
-    {
-        if ($this->area->contains($area)) {
-            $this->area->removeElement($area);
-        }
-
-        return $this;
-    }
-
-    public function getPicture(): ?Picture
-    {
-        return $this->picture;
-    }
-
-    public function setPicture(?Picture $picture): self
-    {
-        $this->picture = $picture;
+        $this->pictures = $pictures;
 
         return $this;
     }
@@ -230,6 +224,107 @@ class Issue
     {
         if ($this->liker->contains($liker)) {
             $this->liker->removeElement($liker);
+        }
+
+        return $this;
+    }
+
+    public function getArea(): ?Area
+    {
+        return $this->area;
+    }
+
+    public function setArea(?Area $area): self
+    {
+        $this->area = $area;
+
+        return $this;
+    }
+
+    public function getStatus(): ?Status
+    {
+        return $this->status;
+    }
+
+    public function setStatus(?Status $status): self
+    {
+        $this->status = $status;
+
+        return $this;
+    }
+
+    public function getGpsCoordinates(): ?string
+    {
+        return $this->gpsCoordinates;
+    }
+
+    public function setGpsCoordinates(?string $gpsCoordinates): self
+    {
+        $this->gpsCoordinates = $gpsCoordinates;
+
+        return $this;
+    }
+
+    public function getCreator(): ?User
+    {
+        return $this->creator;
+    }
+
+    public function setCreator(?User $creator): self
+    {
+        $this->creator = $creator;
+
+        return $this;
+    }
+
+    public function getCategory(): ?IssueCategory
+    {
+        return $this->category;
+    }
+
+    public function setCategory(?IssueCategory $category): self
+    {
+        $this->category = $category;
+
+        return $this;
+    }
+
+    public function addModerator(ModeratorIssue $moderator): self
+    {
+        if (!$this->moderators->contains($moderator)) {
+            $this->moderators[] = $moderator;
+            $moderator->setIssue($this);
+        }
+
+        return $this;
+    }
+
+    public function removeModerator(ModeratorIssue $moderator): self
+    {
+        if ($this->moderators->contains($moderator)) {
+            $this->moderators->removeElement($moderator);
+            // set the owning side to null (unless already changed)
+            if ($moderator->getIssue() === $this) {
+                $moderator->setIssue(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function addPicture(Picture $picture): self
+    {
+        if (!$this->pictures->contains($picture)) {
+            $this->pictures[] = $picture;
+        }
+
+        return $this;
+    }
+
+    public function removePicture(Picture $picture): self
+    {
+        if ($this->pictures->contains($picture)) {
+            $this->pictures->removeElement($picture);
         }
 
         return $this;

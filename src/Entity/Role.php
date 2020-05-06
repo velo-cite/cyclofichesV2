@@ -21,7 +21,7 @@ class Role
     private $id;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(type="string", length=32, nullable=true)
      */
     private $name;
 
@@ -30,9 +30,21 @@ class Role
      */
     private $users;
 
+    /**
+     * @ORM\ManyToMany(targetEntity="App\Entity\Visibility", inversedBy="roles")
+     */
+    private $visibilities;
+
+    /**
+     * @ORM\ManyToMany(targetEntity="App\Entity\Right", inversedBy="roles")
+     */
+    private $rights;
+
     public function __construct()
     {
         $this->users = new ArrayCollection();
+        $this->visibilities = new ArrayCollection();
+        $this->rights = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -78,6 +90,58 @@ class Role
             if ($user->getRole() === $this) {
                 $user->setRole(null);
             }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Visibility[]
+     */
+    public function getVisibilities(): Collection
+    {
+        return $this->visibilities;
+    }
+
+    public function addVisibility(Visibility $visibility): self
+    {
+        if (!$this->visibilities->contains($visibility)) {
+            $this->visibilities[] = $visibility;
+        }
+
+        return $this;
+    }
+
+    public function removeVisibility(Visibility $visibility): self
+    {
+        if ($this->visibilities->contains($visibility)) {
+            $this->visibilities->removeElement($visibility);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Right[]
+     */
+    public function getRights(): Collection
+    {
+        return $this->rights;
+    }
+
+    public function addRight(Right $right): self
+    {
+        if (!$this->rights->contains($right)) {
+            $this->rights[] = $right;
+        }
+
+        return $this;
+    }
+
+    public function removeRight(Right $right): self
+    {
+        if ($this->rights->contains($right)) {
+            $this->rights->removeElement($right);
         }
 
         return $this;

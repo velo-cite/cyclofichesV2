@@ -26,12 +26,12 @@ class Picture
     private $fileName;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Issue", mappedBy="picture")
+     * @ORM\ManyToMany(targetEntity="App\Entity\Issue", mappedBy="pictures")
      */
     private $issues;
 
     /**
-     * @ORM\ManyToMany(targetEntity="App\Entity\Message", mappedBy="picture")
+     * @ORM\ManyToMany(targetEntity="App\Entity\Message", mappedBy="pictures")
      */
     private $messages;
 
@@ -70,7 +70,7 @@ class Picture
     {
         if (!$this->issues->contains($issue)) {
             $this->issues[] = $issue;
-            $issue->setPicture($this);
+            $issue->addPicture($this);
         }
 
         return $this;
@@ -80,10 +80,7 @@ class Picture
     {
         if ($this->issues->contains($issue)) {
             $this->issues->removeElement($issue);
-            // set the owning side to null (unless already changed)
-            if ($issue->getPicture() === $this) {
-                $issue->setPicture(null);
-            }
+            $issue->removePicture($this);
         }
 
         return $this;
@@ -116,4 +113,5 @@ class Picture
 
         return $this;
     }
+
 }

@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -27,6 +29,16 @@ class IssueCategory
      * @ORM\Column(type="boolean", nullable=true)
      */
     private $moderationNeeded;
+
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\Issue", mappedBy="category")
+     */
+    private $issues;
+
+    public function __construct()
+    {
+        $this->issues = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -53,6 +65,37 @@ class IssueCategory
     public function setModerationNeeded(?bool $moderationNeeded): self
     {
         $this->moderationNeeded = $moderationNeeded;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Issue[]
+     */
+    public function getIssues(): Collection
+    {
+        return $this->issues;
+    }
+
+    public function addIssue(Issue $issue): self
+    {
+        if (!$this->issues->contains($issue)) {
+            $this->issues[] = $issue;
+            $issue->setCategory($this);
+        }
+
+        return $this;
+    }
+
+    public function removeIssue(Issue $issue): self
+    {
+        if ($this->issues->contains($issue)) {
+            $this->issues->removeElement($issue);
+            // set the owning side to null (unless already changed)
+            if ($issue->getCategory() === $this) {
+                $issue->setCategory(null);
+            }
+        }
 
         return $this;
     }

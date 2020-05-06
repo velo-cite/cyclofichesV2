@@ -38,26 +38,26 @@ class Message
     /**
      * @ORM\Column(type="datetime", nullable=true)
      */
-    private $creationdate;
-
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
-    private $visibility;
+    private $creationDate;
 
     /**
      * @ORM\ManyToMany(targetEntity="App\Entity\Picture", inversedBy="messages")
      */
-    private $picture;
+    private $pictures;
 
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\Alert", mappedBy="message")
      */
     private $alerts;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\Visibility")
+     */
+    private $visibility;
+
     public function __construct()
     {
-        $this->picture = new ArrayCollection();
+        $this->pictures = new ArrayCollection();
         $this->alerts = new ArrayCollection();
     }
 
@@ -102,14 +102,14 @@ class Message
         return $this;
     }
 
-    public function getCreationdate(): ?\DateTimeInterface
+    public function getCreationDate(): ?\DateTimeInterface
     {
-        return $this->creationdate;
+        return $this->creationDate;
     }
 
-    public function setCreationdate(?\DateTimeInterface $creationdate): self
+    public function setCreationDate(?\DateTimeInterface $creationDate): self
     {
-        $this->creationdate = $creationdate;
+        $this->creationDate = $creationDate;
 
         return $this;
     }
@@ -129,15 +129,15 @@ class Message
     /**
      * @return Collection|Picture[]
      */
-    public function getPicture(): Collection
+    public function getPictures(): Collection
     {
-        return $this->picture;
+        return $this->pictures;
     }
 
     public function addPicture(Picture $picture): self
     {
-        if (!$this->picture->contains($picture)) {
-            $this->picture[] = $picture;
+        if (!$this->pictures->contains($picture)) {
+            $this->pictures[] = $picture;
         }
 
         return $this;
@@ -145,8 +145,8 @@ class Message
 
     public function removePicture(Picture $picture): self
     {
-        if ($this->picture->contains($picture)) {
-            $this->picture->removeElement($picture);
+        if ($this->pictures->contains($picture)) {
+            $this->pictures->removeElement($picture);
         }
 
         return $this;

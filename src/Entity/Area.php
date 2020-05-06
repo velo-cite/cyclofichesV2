@@ -21,12 +21,12 @@ class Area
     private $id;
 
     /**
-     * @ORM\Column(type="text", nullable=true)
+     * @ORM\Column(type="string", length=255, nullable=true)
      */
     private $name;
 
     /**
-     * @ORM\ManyToMany(targetEntity="App\Entity\Issue", mappedBy="area")
+     * @ORM\OneToMany(targetEntity="App\Entity\Issue", mappedBy="area")
      */
     private $issues;
 
@@ -64,7 +64,7 @@ class Area
     {
         if (!$this->issues->contains($issue)) {
             $this->issues[] = $issue;
-            $issue->addArea($this);
+            $issue->setArea($this);
         }
 
         return $this;
@@ -74,9 +74,13 @@ class Area
     {
         if ($this->issues->contains($issue)) {
             $this->issues->removeElement($issue);
-            $issue->removeArea($this);
+            // set the owning side to null (unless already changed)
+            if ($issue->getArea() === $this) {
+                $issue->setArea(null);
+            }
         }
 
         return $this;
     }
+
 }

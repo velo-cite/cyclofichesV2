@@ -23,7 +23,7 @@ class User implements UserInterface
     private $id;
 
     /**
-     * @ORM\Column(type="string", length=180, unique=true)
+     * @ORM\Column(type="string", length=128, unique=true)
      */
     private $email;
 
@@ -38,12 +38,7 @@ class User implements UserInterface
      */
     private $password;
 
-     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
-    private $username;
-
-     /**
+    /**
      * @ORM\Column(type="datetime", nullable=true)
      */
     private $lastConnexion;
@@ -61,18 +56,34 @@ class User implements UserInterface
     /**
      * @ORM\ManyToMany(targetEntity="App\Entity\Issue", mappedBy="liker")
      */
-    private $issues;
+    private $issuesLiked;
 
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\Issue", mappedBy="creator")
+     */
+    private $issuesCreated;
+
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\ModeratorIssue", mappedBy="moderator")
+     */
+    private $issuesModerated;
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\Alert", mappedBy="user")
      */
     private $alerts;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\Role", inversedBy="users")
+     */
+    private $role;
+
     public function __construct()
     {
         $this->messages = new ArrayCollection();
-        $this->issues = new ArrayCollection();
+        $this->issuesLiked = new ArrayCollection();
         $this->alerts = new ArrayCollection();
+        $this->issuesCreated = new ArrayCollection();
+        $this->issuesModerated = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -104,7 +115,7 @@ class User implements UserInterface
 
     public function setUsername(?string $username): self
     {
-        $this->username = $username;
+        $username1 = $username;
 
         return $this;
     }
@@ -218,15 +229,15 @@ class User implements UserInterface
     /**
      * @return Collection|Issue[]
      */
-    public function getIssues(): Collection
+    public function getIssuesLiked(): Collection
     {
-        return $this->issues;
+        return $this->issuesLiked;
     }
 
     public function addIssue(Issue $issue): self
     {
-        if (!$this->issues->contains($issue)) {
-            $this->issues[] = $issue;
+        if (!$this->issuesLiked->contains($issue)) {
+            $this->issuesLiked[] = $issue;
             $issue->addLiker($this);
         }
 
@@ -235,8 +246,8 @@ class User implements UserInterface
 
     public function removeIssue(Issue $issue): self
     {
-        if ($this->issues->contains($issue)) {
-            $this->issues->removeElement($issue);
+        if ($this->issuesLiked->contains($issue)) {
+            $this->issuesLiked->removeElement($issue);
             $issue->removeLiker($this);
         }
 
@@ -270,6 +281,100 @@ class User implements UserInterface
                 $alert->setUser(null);
             }
         }
+
+        return $this;
+    }
+
+    public function addIssuesLiked(Issue $issuesLiked): self
+    {
+        if (!$this->issuesLiked->contains($issuesLiked)) {
+            $this->issuesLiked[] = $issuesLiked;
+            $issuesLiked->addLiker($this);
+        }
+
+        return $this;
+    }
+
+    public function removeIssuesLiked(Issue $issuesLiked): self
+    {
+        if ($this->issuesLiked->contains($issuesLiked)) {
+            $this->issuesLiked->removeElement($issuesLiked);
+            $issuesLiked->removeLiker($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Issue[]
+     */
+    public function getIssuesCreated(): Collection
+    {
+        return $this->issuesCreated;
+    }
+
+    public function addIssuesCreated(Issue $issuesCreated): self
+    {
+        if (!$this->issuesCreated->contains($issuesCreated)) {
+            $this->issuesCreated[] = $issuesCreated;
+            $issuesCreated->setCreator($this);
+        }
+
+        return $this;
+    }
+
+    public function removeIssuesCreated(Issue $issuesCreated): self
+    {
+        if ($this->issuesCreated->contains($issuesCreated)) {
+            $this->issuesCreated->removeElement($issuesCreated);
+            // set the owning side to null (unless already changed)
+            if ($issuesCreated->getCreator() === $this) {
+                $issuesCreated->setCreator(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|ModeratorIssue[]
+     */
+    public function getIssuesModerated(): Collection
+    {
+        return $this->issuesModerated;
+    }
+
+    public function addIssuesModerated(ModeratorIssue $issuesModerated): self
+    {
+        if (!$this->issuesModerated->contains($issuesModerated)) {
+            $this->issuesModerated[] = $issuesModerated;
+            $issuesModerated->setModerator($this);
+        }
+
+        return $this;
+    }
+
+    public function removeIssuesModerated(ModeratorIssue $issuesModerated): self
+    {
+        if ($this->issuesModerated->contains($issuesModerated)) {
+            $this->issuesModerated->removeElement($issuesModerated);
+            // set the owning side to null (unless already changed)
+            if ($issuesModerated->getModerator() === $this) {
+                $issuesModerated->setModerator(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getRole(): ?Role
+    {
+        return $this->role;
+    }
+
+    public function setRole(?Role $role): self
+    {
+        $this->role = $role;
 
         return $this;
     }
