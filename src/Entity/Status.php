@@ -13,6 +13,10 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Status
 {
+    const NAME_A_TRAITER = 'A_TRAITER';
+    const NAME_TRAITE = 'TRAITE';
+    const NAME_PROGRESS = 'EN_COURS';
+
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
