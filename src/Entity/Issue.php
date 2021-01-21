@@ -14,7 +14,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *     collectionOperations={"get", "post"},
  *     itemOperations={"get"},
  *     normalizationContext={"groups"={"read"}},
- *     denormalizationContext={"groups"={"write"}}
+ *     denormalizationContext={"groups"={"write:issue"}}
  * )
  * @ORM\Entity(repositoryClass="App\Repository\IssueRepository")
  */
@@ -39,13 +39,22 @@ class Issue
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
-     * @Groups("write")
+     * @Groups("write:issue")
      * @Assert\NotBlank()
      */
     private $address;
 
+     /**
+     * @ORM\Column(type="text", nullable=true)
+     * @Groups({"write:issue"})
+     */
+    private $description;
+
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
+     * @Groups({"write:issue"})
+     * @Assert\NotBlank()
+     * @Assert\Regex("/^(-?\d+(\.\d+)?),\s*(-?\d+(\.\d+)?)$/")
      */
     private $gpsCoordinates;
 
@@ -81,11 +90,15 @@ class Issue
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="issuesCreated")
+     * @Groups({"write:issue"})
+     * @Assert\NotNull()
      */
     private $creator;
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\IssueCategory", inversedBy="issues")
+     * @Groups({"write:issue"})
+     * @Assert\NotNull()
      */
     private $category;
 
@@ -335,6 +348,18 @@ class Issue
         if ($this->pictures->contains($picture)) {
             $this->pictures->removeElement($picture);
         }
+
+        return $this;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): self
+    {
+        $this->description = $description;
 
         return $this;
     }
