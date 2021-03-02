@@ -9,6 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Serializer\Annotation\Groups;
 
+
 /**
  * @ApiResource(
  *     collectionOperations={"get", "post"},
@@ -17,6 +18,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *     denormalizationContext={"groups"={"write:issue"}}
  * )
  * @ORM\Entity(repositoryClass="App\Repository\IssueRepository")
+ * @ORM\HasLifecycleCallbacks()
  */
 class Issue
 {
@@ -47,6 +49,7 @@ class Issue
      /**
      * @ORM\Column(type="text", nullable=true)
      * @Groups({"write:issue"})
+     * @Assert\NotBlank()
      */
     private $description;
 
@@ -89,11 +92,11 @@ class Issue
     private $status;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="issuesCreated")
+     * @ORM\Column(type="string", nullable=false, length=255)
      * @Groups({"write:issue"})
      * @Assert\NotNull()
      */
-    private $creator;
+    private $creatorEmail;
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\IssueCategory", inversedBy="issues")
@@ -102,6 +105,7 @@ class Issue
      */
     private $category;
 
+   
     public function __construct()
     {
         $this->moderators = new ArrayCollection();
@@ -287,14 +291,14 @@ class Issue
         return $this;
     }
 
-    public function getCreator(): ?User
+    public function getCreatorEmail(): ?string
     {
-        return $this->creator;
+        return $this->creatorEmail;
     }
 
-    public function setCreator(?User $creator): self
+    public function setCreatorEmail(?string $creatorEmail): self
     {
-        $this->creator = $creator;
+        $this->creatorEmail = $creatorEmail;
 
         return $this;
     }
@@ -362,5 +366,15 @@ class Issue
         $this->description = $description;
 
         return $this;
+    }
+
+    /**
+     * @ORM\PrePersist() 
+     */
+     
+    public function generateCode()
+    {
+        $date = new \DateTime(); 
+        $this->code = "CF-". $date->format('Ymd'); 
     }
 }
