@@ -14,7 +14,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
  * @ApiResource(
  *     collectionOperations={"get", "post"},
  *     itemOperations={"get"},
- *     normalizationContext={"groups"={"read"}},
+ *     normalizationContext={"groups"={"read:issue"}},
  *     denormalizationContext={"groups"={"write:issue"}}
  * )
  * @ORM\Entity(repositoryClass="App\Repository\IssueRepository")
@@ -31,11 +31,13 @@ class Issue
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
+     * @Groups({"read:issue"})
      */
     private $code;
 
     /**
      * @ORM\Column(type="datetime", nullable=true)
+     * @Groups({"read:issue"})
      */
     private $creationDate;
 
@@ -50,6 +52,7 @@ class Issue
      * @ORM\Column(type="text", nullable=true)
      * @Groups({"write:issue"})
      * @Assert\NotBlank()
+     * @Groups({"read:issue"})
      */
     private $description;
 
@@ -58,6 +61,7 @@ class Issue
      * @Groups({"write:issue"})
      * @Assert\NotBlank()
      * @Assert\Regex("/^(-?\d+(\.\d+)?),\s*(-?\d+(\.\d+)?)$/")
+     * @Groups({"read:issue"})
      */
     private $gpsCoordinates;
 
@@ -96,7 +100,8 @@ class Issue
     /**
      * @ORM\Column(type="string", nullable=false, length=255)
      * @Groups({"write:issue"})
-     * @Assert\NotBlank()
+     * @Assert\Regex("/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/")
+     * @Groups({"read:issue"})
      */
     private $creatorEmail;
 
