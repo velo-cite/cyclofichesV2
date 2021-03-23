@@ -16,6 +16,9 @@
             "./src/Entity/.gitignore"
         ]
     },
+    "behat/transliterator": {
+        "version": "v1.3.0"
+    },
     "doctrine/annotations": {
         "version": "1.0",
         "recipe": {
@@ -101,6 +104,9 @@
     "friendsofphp/proxy-manager-lts": {
         "version": "v1.0.3"
     },
+    "gedmo/doctrine-extensions": {
+        "version": "v3.0.3"
+    },
     "jms/metadata": {
         "version": "2.5.0"
     },
@@ -175,6 +181,15 @@
         "files": [
             "./config/packages/sensio_framework_extra.yaml"
         ]
+    },
+    "stof/doctrine-extensions-bundle": {
+        "version": "1.2",
+        "recipe": {
+            "repo": "github.com/symfony/recipes-contrib",
+            "branch": "master",
+            "version": "1.2",
+            "ref": "6c1ceb662f8997085f739cd089bfbef67f245983"
+        }
     },
     "symfony/asset": {
         "version": "v5.0.5"
