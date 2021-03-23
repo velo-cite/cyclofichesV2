@@ -43,7 +43,7 @@ class Issue
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
-     * @Groups("write:issue")
+     * @Groups({"write:issue", "read:issue"})
      * @Assert\NotBlank()
      */
     private $address;
@@ -77,6 +77,7 @@ class Issue
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Area", inversedBy="issues")
+     * @Groups({"read:issue"})
      */
     private $area;
 
@@ -94,6 +95,7 @@ class Issue
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Status", inversedBy="issues")
+     * @Groups({"read:issue"})
      */
     private $status;
 
