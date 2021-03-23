@@ -3,13 +3,50 @@
 namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
+use ApiPlatform\Core\Annotation\ApiProperty;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Vich\UploaderBundle\Mapping\Annotation as Vich;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * @ApiResource()
+ * @ApiResource(
+ *     iri="http://schema.org/MediaObject",
+ *     normalizationContext={
+ *         "groups"={"picture_read"}
+ *     },
+ *     collectionOperations={
+ *         "post"={
+ *             "controller"="App\Controller\CreatePictureAction",
+ *             "deserialize"=false,
+ *             "validation_groups"={"Default", "picture_create"},
+ *             "openapi_context"={
+ *                 "requestBody"={
+ *                     "content"={
+ *                         "multipart/form-data"={
+ *                             "schema"={
+ *                                 "type"="object",
+ *                                 "properties"={
+ *                                     "file"={
+ *                                         "type"="string",
+ *                                         "format"="binary"
+ *                                     }
+ *                                 }
+ *                             }
+ *                         }
+ *                     }
+ *                 }
+ *             }
+ *         },
+ *         "get"
+ *     },
+ *     itemOperations={
+ *         "get"
+ *     }
+ * )
  * @ORM\Entity(repositoryClass="App\Repository\PictureRepository")
+ * @Vich\Uploadable
  */
 class Picture
 {
@@ -23,12 +60,20 @@ class Picture
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
-    private $fileName;
+    private $filePath;
 
     /**
-     * @ORM\ManyToMany(targetEntity="App\Entity\Issue", mappedBy="pictures")
+     * @var File|null
+     *
+     * @Assert\NotNull(groups={"picture_create"})
+     * @Vich\UploadableField(mapping="picture", fileNameProperty="filePath")
      */
-    private $issues;
+    public $file;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\Issue", inversedBy="pictures")
+     */
+    private $issue;
 
     /**
      * @ORM\ManyToMany(targetEntity="App\Entity\Message", mappedBy="pictures")
@@ -37,7 +82,6 @@ class Picture
 
     public function __construct()
     {
-        $this->issues = new ArrayCollection();
         $this->messages = new ArrayCollection();
     }
 
@@ -46,42 +90,29 @@ class Picture
         return $this->id;
     }
 
-    public function getFileName(): ?string
+    public function getFilePath(): ?string
     {
-        return $this->fileName;
+        return $this->filePath;
     }
 
-    public function setFileName(?string $fileName): self
+    public function setFilePath(?string $filePath): self
     {
-        $this->fileName = $fileName;
+        $this->filePath = $filePath;
 
         return $this;
     }
 
     /**
-     * @return Collection|Issue[]
+     * @return Issue|null
      */
-    public function getIssues(): Collection
+    public function getIssue(): ?Issue
     {
-        return $this->issues;
+        return $this->issue;
     }
 
-    public function addIssue(Issue $issue): self
+    public function setIssue(Issue $issue): self
     {
-        if (!$this->issues->contains($issue)) {
-            $this->issues[] = $issue;
-            $issue->addPicture($this);
-        }
-
-        return $this;
-    }
-
-    public function removeIssue(Issue $issue): self
-    {
-        if ($this->issues->contains($issue)) {
-            $this->issues->removeElement($issue);
-            $issue->removePicture($this);
-        }
+        $this->issue = $issue;
 
         return $this;
     }

@@ -77,14 +77,16 @@ class Issue
     private $area;
 
     /**
-     * @ORM\ManyToMany(targetEntity="App\Entity\Picture", inversedBy="issues")
+     * @ORM\OneToMany(targetEntity="App\Entity\Picture", mappedBy="issue")
+     * @Groups({"write:issue"})
+     * @Assert\Count(min=1)
      */
     private $pictures;
 
     /**
      * @ORM\ManyToMany(targetEntity="App\Entity\User", inversedBy="issuesLiked")
      */
-    private $liker;
+    private $likers;
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Status", inversedBy="issues")
@@ -94,7 +96,7 @@ class Issue
     /**
      * @ORM\Column(type="string", nullable=false, length=255)
      * @Groups({"write:issue"})
-     * @Assert\NotNull()
+     * @Assert\NotBlank()
      */
     private $creatorEmail;
 
@@ -110,7 +112,7 @@ class Issue
     {
         $this->moderators = new ArrayCollection();
         $this->messages = new ArrayCollection();
-        $this->liker = new ArrayCollection();
+        $this->likers = new ArrayCollection();
         $this->pictures = new ArrayCollection();
     }
 
@@ -217,30 +219,18 @@ class Issue
         return $this;
     }
 
-    public function getPictures(): ?Picture
-    {
-        return $this->pictures;
-    }
-
-    public function setPictures(?Picture $pictures): self
-    {
-        $this->pictures = $pictures;
-
-        return $this;
-    }
-
     /**
      * @return Collection|User[]
      */
-    public function getLiker(): Collection
+    public function getLikers(): Collection
     {
-        return $this->liker;
+        return $this->likers;
     }
 
     public function addLiker(User $liker): self
     {
-        if (!$this->liker->contains($liker)) {
-            $this->liker[] = $liker;
+        if (!$this->likers->contains($liker)) {
+            $this->likers[] = $liker;
         }
 
         return $this;
@@ -248,8 +238,8 @@ class Issue
 
     public function removeLiker(User $liker): self
     {
-        if ($this->liker->contains($liker)) {
-            $this->liker->removeElement($liker);
+        if ($this->likers->contains($liker)) {
+            $this->likers->removeElement($liker);
         }
 
         return $this;
@@ -336,6 +326,11 @@ class Issue
         }
 
         return $this;
+    }
+
+    public function getPictures(): Collection
+    {
+        return $this->pictures;
     }
 
     public function addPicture(Picture $picture): self

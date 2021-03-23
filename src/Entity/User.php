@@ -10,7 +10,10 @@ use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
- * @ApiResource()
+ * @ApiResource(
+ *  collectionOperations={"get"},
+ *  itemOperations={}
+ * )
  * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
  */
 class User implements UserInterface
@@ -55,14 +58,9 @@ class User implements UserInterface
     private $messages;
 
     /**
-     * @ORM\ManyToMany(targetEntity="App\Entity\Issue", mappedBy="liker")
+     * @ORM\ManyToMany(targetEntity="App\Entity\Issue", mappedBy="likers")
      */
     private $issuesLiked;
-
-    /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Issue", mappedBy="creator")
-     */
-    private $issuesCreated;
 
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\ModeratorIssue", mappedBy="moderator")
